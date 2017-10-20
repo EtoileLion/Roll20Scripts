@@ -27,6 +27,12 @@ var handsize = [0,2,2,3,3,3,4,4,4,4,4,5,5,5,5,6,6,6,6,7,7];
 var debug_output = true;
 
 on("chat:message", function(msg) {
+    if(msg.type == "api" && msg.content == "!cardcaster") {
+		sendChat("Cartomancy Script","/w \""+msg.who.replace(" (GM)","")+"\" Cartomancy Main Commands:<br />[Draw](!cardcaster draw) [Hand](!cardcaster hand) [Play](!cardcaster play) [Discard](!cardcaster discard)<hr />Special Actions: <br />(Coming Soon)"); 
+	}
+});
+
+on("chat:message", function(msg) {
     if(msg.type == "api" && msg.content.indexOf("!cardcaster draw") !== -1) {
        //Get Character and Cardcaster Level.
 	   var temp = get_cardcaster_level(msg);
@@ -50,6 +56,8 @@ on("chat:message", function(msg) {
 		if (cardsdrawn.length > 0) { 
 		    sendChat("Cartomancy Script","/w \""+msg.who.replace(" (GM)","")+"\" "+displaycards(cardsdrawn,character)); 
 		    sendChat("Cartomancy Script","/w GM "+msg.who.replace(" (GM)","")+" drew "+_.map(cardsdrawn, function(y) { card = cartomancycards.find((x) => x.cardno == y); return (card == undefined) ? "ERROR" : card.name }).join(","));
+		} else {
+		    sendChat("Cartomancy Script","/w \""+msg.who.replace(" (GM)","")+"\" No Cards Drawn."); 		
 		}
 
 		hand.set("current",cardsinhand.join("|"));

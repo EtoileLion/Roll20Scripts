@@ -42,11 +42,12 @@ Toggles the Cardcaster Jack of Beasts Focus Card Monstrous Arcana ability, addin
 
 ## FAQ
 *Can't this be done with Roll20's inbuilt decks?*  
-Yes, it could, but this system was developed for a campaign in which players played multiple characters across different sessions; as a Hand of cards in Roll20 is attached to a Player, not a Character, this system was devised.  
+Yes, it could, but this system was developed for a campaign in which players played multiple characters across different sessions; as a Hand of cards in Roll20 is attached to a Player, not a Character, this system was devised to allow players to play their other characters, or a different cardcaster, without losing track of their current one's deck.  
 Additionally, this system was devised as a way to avoid tedious bookkeeping and repeated lookups, especially across multiple tables in the case of Jack of Beasts.
 
 *What about [abilityX]?*  
-I have a list of abilities i'm still adding functionality for at the bottom of the script.
+I have a list of abilities i'm still adding functionality for at the bottom of the script. If there's something I'm missing, feel free to drop an issue in.
 
 *How do I get started?*  
-Have a character in the game with the Cardcaster class, and type !cardcaster into the chat with that character's token selected. (Note: Macro'ing is highly recommended)
+Step 1: Install the script. (Obviously, this requires a Roll20 Pro account, to install custom javascript).  
+Step 2: Have a character in the game with the Cardcaster class, and type !cardcaster into the chat with that character's token selected. (Note: Macro'ing the top level commands is highly recommended)
