@@ -27,13 +27,36 @@ var handsize = [0,2,2,3,3,3,4,4,4,4,4,5,5,5,5,6,6,6,6,7,7];
 var debug_output = true;
 
 on("chat:message", function(msg) {
-    if(msg.type == "api" && msg.content == "!cardcaster") {
-		sendChat("Cartomancy Script","/w \""+msg.who.replace(" (GM)","")+"\" Cartomancy Main Commands:<br />[Draw](!cardcaster draw) [Hand](!cardcaster hand) [Play](!cardcaster play) [Discard](!cardcaster discard)<hr />Special Actions: <br />(Coming Soon)"); 
+    if(msg.type == "api" && msg.content.indexOf("!cardcaster") !== -1) {
+		var msgtokens = msg.content.replace("  "," ").split(" ");
+		switch(msgtokens[1]) {
+			case "draw":
+				cardcaster_draw(msg);
+			break;
+			case "hand":
+				cardcaster_hand(msg);
+			break;
+			case "play":
+				cardcaster_play(msg);
+			break;
+			case "discard":
+				cardcaster_discard(msg);
+			break;
+			case "reform":
+				cardcaster_reform(msg);
+			break;
+			case "beast":
+				cardcaster_beast(msg);
+			break;
+			default:
+				//Control Panel
+				sendChat("Cartomancy Script","/w \""+msg.who.replace(" (GM)","")+"\" Cartomancy Main Commands:<br />[Draw](!cardcaster draw) [Hand](!cardcaster hand) [Play](!cardcaster play) [Discard](!cardcaster discard) [Reform](!cardcaster reform)<hr />Special Actions: <br />[Toggle Beast Focus](!cardcaster beast)"); 
+			break;
+		}
 	}
 });
 
-on("chat:message", function(msg) {
-    if(msg.type == "api" && msg.content.indexOf("!cardcaster draw") !== -1) {
+function cardcaster_draw(msg) {
        //Get Character and Cardcaster Level.
 	   var temp = get_cardcaster_level(msg);
 	   if(temp.length == 0) { return; }
@@ -62,11 +85,10 @@ on("chat:message", function(msg) {
 
 		hand.set("current",cardsinhand.join("|"));
 		deck.set("current",cardsindeck.join("|"));
-    }
-});
+};
 
-on("chat:message", function(msg) {
-    if(msg.type == "api" && msg.content.indexOf("!cardcaster hand") !== -1) {
+
+function cardcaster_hand(msg) {
        //Get Character and Cardcaster Level.
 	   var temp = get_cardcaster_level(msg);
 	   if(temp.length == 0) { return; }	   
@@ -77,18 +99,14 @@ on("chat:message", function(msg) {
 	   var hand = getAttrByName(character,"hand").split("|");
 	   if (hand.length == 0) { reject("You have no cards in hand."); return; }	 
 	   sendChat("Cartomancy Script","/w \""+msg.who.replace(" (GM)","")+"\" "+displaycards(hand,character));
-    }
-});
+};
 
-on("chat:message", function(msg) {
-    if(msg.type == "api" && msg.content.indexOf("!cardcaster play") !== -1) {
-        
+function cardcaster_play(msg) {        
        //Get Character and Cardcaster Level.
 	   var temp = get_cardcaster_level(msg);
 	   if(temp.length == 0) { return; }	   
 	   var character = temp[0];
 	   var level = temp[1];
-        //If character does not have cartomancy fields, reject.
        var handmod = findObjs({"name":"hand","_type":"attribute","_characterid":character})[0];
         hand = handmod.get("current").split("|");	   
         var command = msg.content.replace("  "," ").split(" ");
@@ -124,12 +142,10 @@ on("chat:message", function(msg) {
             discard.set("current",_.union(discardsplit,[card.cardno]).join("|"));
             handmod.set("current",_.without(hand,""+card.cardno).join("|")); //Bleh. Type matching issues.
         }
-    }
-});
+ };
 
 
-on("chat:message", function(msg) {
-    if(msg.type == "api" && msg.content.indexOf("!cardcaster discard") !== -1) {
+function cardcaster_discard(msg) {
        //Get Character and Cardcaster Level.
 	   var temp = get_cardcaster_level(msg);
 	   if(temp.length == 0) { return; }	   
@@ -159,11 +175,24 @@ on("chat:message", function(msg) {
             sendChat("Cartomancy Script","/w GM "+msg.who.replace(" (GM)","")+" discarded their "+card.name);
             sendChat("Cartomancy Script","/w \""+msg.who.replace(" (GM)","")+"\" You discarded the "+card.name);
         }
-    }
-});
+};
 
-on("chat:message", function(msg) {
-    if(msg.type == "api" && msg.content.indexOf("!cardcaster beast") !== -1) {
+function cardcaster_reform(msg) {
+	   var temp = get_cardcaster_level(msg);
+	   if(temp.length == 0) { return; } //There was an error in the retrieval of cardcaster level info. Abort.	   
+	   var character = temp[0];
+	   var level = temp[1];
+	   var deck = findObjs({"name":"deck","_type":"attribute","_characterid":character})[0];
+	   var discard = findObjs({"name":"discard","_type":"attribute","_characterid":character})[0];
+	   var newdeck = _.shuffle(_.union(deck.get("current").split("|"),discard.get("current").split("|")));
+	   deck.set("current",newdeck.join("|"));
+	   discard.set("current","");
+       sendChat("Cartomancy Script","/w GM "+msg.who.replace(" (GM)","")+" shuffled their discard into their deck.");
+       sendChat("Cartomancy Script","/w \""+msg.who.replace(" (GM)","")+"\" You shuffled your discard into your deck."); 	   
+}
+	   
+
+function cardcaster_beast(msg) {
 	   var temp = get_cardcaster_level(msg);
 	   if(temp.length == 0) { return; }	   
 	   var character = temp[0];
@@ -172,8 +201,7 @@ on("chat:message", function(msg) {
 	   if (mod.get("current") == "false") { mod.set("current","true"); }
 	   else { mod.set("current","false"); }
 	   sendChat("Cartomancy Script","/w \""+msg.who.replace(" (GM)","")+"\" Your Jack of Beasts state is now: "+mod.get("current"));
-	}
-});
+};
 
 function get_cardcaster_level(msg) {
 	debug(msg);
@@ -250,6 +278,15 @@ function displaycards(cards,character) {
 	
 
 //Seeds of Possibility
+function cardcaster_sop(msg) {
+	   var temp = get_cardcaster_level(msg);
+	   if(temp.length == 0) { return; } //There was an error in the retrieval of cardcaster level info. Abort.	   
+	   var character = temp[0];
+	   var level = temp[1];
+	
+	var discard = findObjs({"name":"discard","_type":"attribute","_characterid":character})[0];
+	
+}
 //Sprout of Curiousity
 //Backburn
 //Bloom of Revelation

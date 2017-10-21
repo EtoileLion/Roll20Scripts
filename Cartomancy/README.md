@@ -33,6 +33,11 @@ If the two additional parameters are left out, the player will be prompted to cl
 ```
 If the second parameter is omitted, the player will be prompted to click on the card they wish to discard. When they click on a button, both player and GM's will be whispered to inform them of which card has been discarded.
 
+```
+!cardcaster reform
+```
+Shuffle your discard pile back into your deck after discarding at the end of a long rest.
+
 
 ```
 !cardcaster beast
