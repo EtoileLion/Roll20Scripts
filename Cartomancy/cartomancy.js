@@ -255,6 +255,7 @@ function get_cardcaster_level(msg) {
 }
 
 function reject(msg,who) {
+    log("Cartomancy Error Received: "+msg+" ("+who+")");
 	sendChat("Cartomancy Script","/w \""+who.replace(" (GM)","")+"\" ERROR: "+ msg);
 }
 

@@ -1,6 +1,6 @@
 //Known forms.
 var forms = {
-    "Bear": {}
+    "Bear": {},
     "Wolf": {}
     
 }
@@ -8,21 +8,43 @@ var forms = {
 
 //The Workhorse
 on("change:token:currentSide", function(obj) {
-    //Was this a token I can reference information on?
-      //Get token's "represents" character name. (ID => Name lookup? What is held in the represents field?)
-      //Search Tables in campaign for matching character name.
-        //If none, abort.
-        //If found, reference name of form from table based on currentSide index.
-    //SPECIAL: If currentSide is 0, revert to PC's original values, and erase extra fields. (Character has un-shifted).
-    //DOCUMENTATION: First entry in table must be character's regular form.
-    //Is form in known form list?
-      //If not, abort and throw message to GM to manually supply sheet and notify script writer.
-      //If yes, is character currently shapeshifted? (Check for existance of extra fields)
-        //If no, write extra fields. (Character is shifting from normal to SS)
+    log(obj);
+    //Was this a token I can reference information on?	
+      //Get token's "represents" character object.
+        //This wasnt a character token. Abort.
+  	    if(!obj.get("represents")) { return; }
+		var character = getObj("character",obj.get("represents")).get("id");	   	   
+		log(character);
+
+      //Search Tables in campaign for matching character first name.
+	    var tables = findObjs({"_type":"rollabletable","name":getAttrByName(character,"character_name").split(" ")[0]+"-Forms"})[0];		
+        //If none found, abort.
+		if (tables == undefined) { return; }
+		log(tables);
+        //If found, reference name of form from table based on currentSide index.		
+		//Alternate theory: Reference table items by avatar rather than currentSide, because tableitems dont store an index.
+		var item = findObjs({"_type":"tableitem","avatar":decodeURIComponent(obj.get("sides").split("|")[obj.get("currentSide")]),"_rollabletableid":tables.get("_id")})[0];
+		log(item);
+		//If there was no table item for this entry, abort.
+		if (item == undefined) { sendChat("WildShape Token Script","/w GM The table for this character does not have a matching item for this token state. Please re-create the token from the rollable table."); return; }
+		
+    if (item.get("name") == "Character") {  //If the character is unshifting, restore values.
+        return;   
+    }
+    else if (!wildshape_forms.hasOwnProperty(item.get("name"))) { //If form unknown, abort.
+        sendChat("WildShape Token Script","/w GM The table item named "+item.get("name")+" is not a recognized Wild Shape form. Please check the form table or add a form to the script."); 
+        return; 
+    }
+    else if (getAttrByName(character,"wildshape_store_str") == undefined) { //Character is shifting from normal to animal form. Create backup.
+    } 
+    else { //Character is shifting from animal to animal form. Erase extra attacks and proficiencies from old form.
+    }
     //Replace character stats with form stats:
       //Throw GM warning for Druid/Morph level.
       //Replace STR,DEX,CON.
       //Add proficiencies (SPECIAL: Proficiencies = charcter's + form's.)
       //Change HP and Hit Die.
       //Change AC (Assume Merge or FallOff).
-}
+});
+
+//The Setup
